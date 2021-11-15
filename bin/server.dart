@@ -4,7 +4,7 @@
 
 import 'dart:convert';
 import 'dart:io';
-
+// Note: avoid importing dio to avoid conflicting class names with dart:io
 import 'package:shelf/shelf.dart';
 import 'package:shelf/shelf_io.dart' as shelf_io;
 import 'package:shelf_router/shelf_router.dart' as shelf_router;
@@ -49,6 +49,7 @@ final _router = shelf_router.Router()
     (request) => Response.ok(DateTime.now().toUtc().toIso8601String()),
   )
   ..get('/sum/<a|[0-9]+>/<b|[0-9]+>', _sumHandler);
+//..get('/user/<username>', _userHandler);
 
 Response _helloWorldHandler(Request request) => Response.ok('Hello, World!');
 

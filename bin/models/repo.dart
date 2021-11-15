@@ -60,7 +60,7 @@ class Repo {
   late int size;
   late int? stargazersCount;
   late int watchersCount;
-  late String language;
+  late String? language;
   late bool hasIssues;
   late bool hasProjects;
   late bool hasDownloads;
@@ -142,7 +142,7 @@ class Repo {
       required this.size,
       this.stargazersCount,
       required this.watchersCount,
-      required this.language,
+      this.language,
       required this.hasIssues,
       required this.hasProjects,
       required this.hasDownloads,
@@ -253,17 +253,15 @@ class Repo {
     networkCount = json['network_count'];
     subscribersCount = json['subscribers_count'];
   }
-
+  // TODO: Null aware conversions?
   Map<String, dynamic> toJson() {
-    final Map<String, dynamic> data = Map<String, dynamic>();
+    final Map<String, dynamic> data = <String, dynamic>{};
     data['id'] = id;
     data['node_id'] = nodeId;
     data['name'] = name;
     data['full_name'] = fullName;
     data['private'] = private;
-    if (owner != null) {
-      data['owner'] = owner.toJson();
-    }
+    data['owner'] = owner.toJson();
     data['html_url'] = htmlUrl;
     data['description'] = description;
     data['fork'] = fork;

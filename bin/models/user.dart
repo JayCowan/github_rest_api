@@ -2,6 +2,8 @@ import 'dart:io';
 
 import 'package:dio/dio.dart';
 
+import '../api.dart';
+
 /// Raw user data model pulled from GitHub /users/{user}
 class User {
   late String login;
@@ -156,15 +158,9 @@ class User {
     return data;
   }
 
-  /// Pulls a username directly from github and returns the Future<User> of the 
+  /// Pulls a username directly from github and returns the Future<User> of the
   /// response
   static Future<User> fromUsername(String username) async {
-    var response = await Dio().get('api.github.com/users/$username');
-    if (response.statusCode == 200) {
-      return User.fromJson(response.data);
-    } else {
-      throw Exception(
-        'Response code ${response.statusCode} with message ${response.statusMessage}');
-    }
+    return await Api.fetchUser(username);
   }
 }
