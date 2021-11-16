@@ -253,7 +253,6 @@ class Repo {
     networkCount = json['network_count'];
     subscribersCount = json['subscribers_count'];
   }
-  // TODO: Null aware conversions?
   Map<String, dynamic> toJson() {
     final Map<String, dynamic> data = <String, dynamic>{};
     data['id'] = id;

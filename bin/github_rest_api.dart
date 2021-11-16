@@ -4,12 +4,16 @@
 
 import 'dart:convert';
 import 'dart:io';
+
 // Note: avoid importing dio to avoid conflicting class names with dart:io
+import 'package:dio/dio.dart' show DioError;
+import 'package:dotenv/dotenv.dart' show load, clean, isEveryDefined, env;
 import 'package:shelf/shelf.dart';
 import 'package:shelf/shelf_io.dart' as shelf_io;
 import 'package:shelf_router/shelf_router.dart' as shelf_router;
 import 'package:shelf_static/shelf_static.dart' as shelf_static;
-import 'package:dotenv/dotenv.dart' show load, clean, isEveryDefined, env;
+
+import 'api.dart';
 
 Future main() async {
   load();
@@ -43,25 +47,29 @@ final _staticHandler =
 
 // Router instance to handler requests.
 final _router = shelf_router.Router()
-  ..get('/helloworld', _helloWorldHandler)
-  ..get(
-    '/time',
-    (request) => Response.ok(DateTime.now().toUtc().toIso8601String()),
-  )
-  ..get('/sum/<a|[0-9]+>/<b|[0-9]+>', _sumHandler);
-//..get('/user/<username>', _userHandler);
+  ..get('/user/<username>', _userHandler)
+  ..get('/repo/<owner>/<repoName>', _repoHandler);
 
-Response _helloWorldHandler(Request request) => Response.ok('Hello, World!');
-
-Response _sumHandler(request, String a, String b) {
-  final aNum = int.parse(a);
-  final bNum = int.parse(b);
+Future<Response> _userHandler(request, String username) async {
+  final githubResponse = await Api.fetchUser(username);
   return Response.ok(
-    const JsonEncoder.withIndent(' ')
-        .convert({'a': aNum, 'b': bNum, 'sum': aNum + bNum}),
+    JsonEncoder.withIndent(' ').convert(githubResponse.toJson()),
     headers: {
       'content-type': 'application/json',
-      'Cache-Control': 'public, max-age=604800',
     },
   );
+}
+
+Future<Response> _repoHandler(request, String owner, String repoName) async {
+  try {
+    final githubResponse = await Api.fetchRepo(owner, repoName);
+    return Response.ok(
+      JsonEncoder.withIndent(' ').convert(githubResponse.toJson()),
+      headers: {'content-type': 'application/json'},
+    );
+  } on DioError catch (e, s) {
+    stderr.addError(e, s);
+    print(e.toString());
+    return Response.internalServerError();
+  }
 }

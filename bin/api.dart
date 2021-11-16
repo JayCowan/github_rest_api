@@ -19,6 +19,7 @@ class Api {
   static Future<Repo> fetchRepo(String username, String repoName) async {
     var response = await Dio().get('${Endpoints.repos}/$username/$repoName');
     if (response.statusCode == 200) {
+      print(response.data);
       return Repo.fromJson(response.data);
     } else {
       throw Exception(
@@ -36,7 +37,7 @@ class Endpoints {
   static final String users = githubBase + '/users';
 
   /// Base for repos, postpend {user}/{repo} for specific repo
-  static final String repos = githubBase + '/repos/';
+  static final String repos = githubBase + '/repos';
 
   static String contributorsUrl(String owner, String repo) =>
       '$repos/$owner/$repo/contributors';

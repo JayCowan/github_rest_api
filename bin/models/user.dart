@@ -1,6 +1,3 @@
-import 'dart:io';
-
-import 'package:dio/dio.dart';
 
 import '../api.dart';
 
@@ -32,12 +29,12 @@ class User {
   late bool? hireable;
   late String? bio;
   late String? twitterUsername;
-  late int publicRepos;
-  late int publicGists;
-  late int followers;
-  late int following;
-  late String createdAt;
-  late String updatedAt;
+  late int? publicRepos;
+  late int? publicGists;
+  late int? followers;
+  late int? following;
+  late String? createdAt;
+  late String? updatedAt;
 
   User(
       {required this.login,
@@ -66,53 +63,40 @@ class User {
       this.hireable,
       this.bio,
       this.twitterUsername,
-      required this.publicRepos,
-      required this.publicGists,
-      required this.followers,
-      required this.following,
-      required this.createdAt,
-      required this.updatedAt});
+      this.publicRepos,
+      this.publicGists,
+      this.followers,
+      this.following,
+      this.createdAt,
+      this.updatedAt});
 
   User.fromJson(Map<String, dynamic> json) {
     login = json['login'];
     id = json['id'];
     nodeId = json['node_id'];
-    json['avatar_url'] == 'null' ? null : avatarUrl = json['avatar_url'];
-    json['gravatar_id'] == 'null' ? null : gravatarId = json['gravatar_id'];
+    avatarUrl = json['avatar_url'];
+    gravatarId = json['gravatar_id'];
     url = json['url'];
-    json['html_url'] == 'null' ? null : htmlUrl = json['html_url'];
-    json['followers_url'] == 'null'
-        ? null
-        : followersUrl = json['followers_url'];
-    json['following_url'] == 'null'
-        ? null
-        : followingUrl = json['following_url'];
-    json['gists_url'] == 'null' ? null : gistsUrl = json['gists_url'];
-    json['starred_url'] == 'null' ? null : starredUrl = json['starred_url'];
-    json['subscriptions_url'] == 'null'
-        ? null
-        : subscriptionsUrl = json['subscriptions_url'];
-    json['organizations_url'] == 'null'
-        ? null
-        : organizationsUrl = json['organizations_url'];
+    htmlUrl = json['html_url'];
+    followersUrl = json['followers_url'];
+    followingUrl = json['following_url'];
+    gistsUrl = json['gists_url'];
+    starredUrl = json['starred_url'];
+    subscriptionsUrl = json['subscriptions_url'];
+    organizationsUrl = json['organizations_url'];
     reposUrl = json['repos_url'];
-    json['events_url'] == 'null' ? null : eventsUrl = json['events_url'];
-    json['received_events_url'] == 'null'
-        ? null
-        : receivedEventsUrl = json['recieved_events_url'];
+    eventsUrl = json['events_url'];
+    receivedEventsUrl = json['recieved_events_url'];
     type = json['type'];
     siteAdmin = json['site_admin'];
-    json['name'] == 'null' ? null : name = json['name'];
-    json['company'] == 'null' ? null : company = json['company'];
-    json['blog'] == 'null' ? null : blog = json['blog'];
-    json['location'] == 'null' ? null : location = json['location'];
-    json['email'] == 'null' ? null : email = json['email'];
-    // assume that null == false
-    json['hireable'] == 'null' ? false : hireable = json['hireable'];
-    json['bio'] == 'null' ? null : bio = json['bio'];
-    json['twitter_username'] == 'null'
-        ? null
-        : twitterUsername = json['twitter_username'];
+    name = json['name'];
+    company = json['company'];
+    blog = json['blog'];
+    location = json['location'];
+    email = json['email'];
+    hireable = json['hireable'];
+    bio = json['bio'];
+    twitterUsername = json['twitter_username'];
     publicRepos = json['public_repos'];
     publicGists = json['public_gists'];
     followers = json['followers'];
