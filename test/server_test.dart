@@ -14,7 +14,7 @@ void main() {
   setUp(() async {
     proc = await TestProcess.start(
       'dart',
-      ['bin/server.dart'],
+      ['bin/github_rest_api.dart'],
       environment: {'PORT': '0'},
     );
 
