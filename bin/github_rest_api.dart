@@ -5,7 +5,8 @@
 import 'dart:convert';
 import 'dart:io';
 
-// Note: avoid importing dio to avoid conflicting class names with dart:io
+// Note: avoid importing dio without specifying in show to avoid conflicting
+// class names with dart:io
 import 'package:dio/dio.dart' show DioError;
 import 'package:dotenv/dotenv.dart' show load, clean, isEveryDefined, env;
 import 'package:shelf/shelf.dart';
@@ -14,6 +15,7 @@ import 'package:shelf_router/shelf_router.dart' as shelf_router;
 import 'package:shelf_static/shelf_static.dart' as shelf_static;
 
 import 'api.dart';
+import 'models/user.dart';
 
 Future main() async {
   load();
@@ -47,6 +49,7 @@ final _staticHandler =
 
 // Router instance to handler requests.
 final _router = shelf_router.Router()
+  ..get('/rank=<userList>', _rankHandler)
   ..get('/user/<username>', _userHandler)
   ..get('/repo/<owner>/<repoName>', _repoHandler);
 
@@ -69,7 +72,43 @@ Future<Response> _repoHandler(request, String owner, String repoName) async {
     );
   } on DioError catch (e, s) {
     stderr.addError(e, s);
-    print(e.toString());
+    return Response.internalServerError();
+  }
+}
+
+Future<Response> _rankHandler(Request request, String userList) async {
+  try {
+    var users = userList.trim().split(',');
+    List<User> ranks = <User>[];
+    for (String user in users) {
+      ranks.add(await User.fromUsername(user.trim()));
+    }
+    ranks.sort((User a, User b) {
+      a.publicRepos = a.publicRepos is int ? a.publicRepos as int : 0;
+      b.publicRepos = b.publicRepos is int ? b.publicRepos as int : 0;
+      a.followers = a.followers is int ? a.followers as int : 0;
+      b.followers = b.followers is int ? b.followers as int : 0;
+      a.createdAt = a.createdAt is String
+          ? a.createdAt as String
+          : DateTime.now().toString();
+      b.createdAt = b.createdAt is String
+          ? b.createdAt as String
+          : DateTime.now().toString();
+
+      return -1 *
+          (a.publicRepos! * (a.followers! + 1) +
+                  (-5 *
+                      DateTime.tryParse(a.createdAt!)!
+                          .compareTo(DateTime.tryParse(b.createdAt!)!)))
+              .compareTo(b.publicRepos! * (b.followers! + 1) +
+                  (-5 *
+                      DateTime.tryParse(b.createdAt!)!
+                          .compareTo(DateTime.tryParse(a.createdAt!)!)));
+    });
+    print(jsonEncode(ranks));
+    return Response.ok(jsonEncode(ranks));
+  } on DioError catch (e, s) {
+    stderr.addError(e, s);
     return Response.internalServerError();
   }
 }
