@@ -44,8 +44,8 @@ Future main() async {
 }
 
 // Serve files from the file system.
-final _staticHandler =
-    shelf_static.createStaticHandler('build/web', defaultDocument: 'index.html');
+final _staticHandler = shelf_static.createStaticHandler('build/web',
+    defaultDocument: 'index.html');
 
 // Router instance to handler requests.
 final _router = shelf_router.Router()
@@ -55,20 +55,22 @@ final _router = shelf_router.Router()
 
 Future<Response> _userHandler(request, String username) async {
   final githubResponse = await Api.fetchUser(username);
+  var headers = {'content-type': 'application/json'};
+  headers.addAll(Api.headers);
   return Response.ok(
     JsonEncoder.withIndent(' ').convert(githubResponse.toJson()),
-    headers: {
-      'content-type': 'application/json',
-    },
+    headers: headers,
   );
 }
 
 Future<Response> _repoHandler(request, String owner, String repoName) async {
   try {
     final githubResponse = await Api.fetchRepo(owner, repoName);
+    var headers = {'content-type': 'application/json'};
+    headers.addAll(Api.headers);
     return Response.ok(
       JsonEncoder.withIndent(' ').convert(githubResponse.toJson()),
-      headers: {'content-type': 'application/json'},
+      headers: headers,
     );
   } on DioError catch (e, s) {
     stderr.addError(e, s);
@@ -106,7 +108,12 @@ Future<Response> _rankHandler(Request request, String userList) async {
                           .compareTo(DateTime.tryParse(a.createdAt!)!)));
     });
     print(jsonEncode(ranks));
-    return Response.ok(jsonEncode(ranks));
+    var headers = {'content-type': 'application/json'};
+    headers.addAll(Api.headers);
+    return Response.ok(
+      jsonEncode(ranks),
+      headers: headers,
+    );
   } on DioError catch (e, s) {
     stderr.addError(e, s);
     return Response.internalServerError();

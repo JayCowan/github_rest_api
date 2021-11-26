@@ -1,3 +1,5 @@
+import 'dart:io';
+
 import 'package:dio/dio.dart';
 
 import 'models/repo.dart';
@@ -5,6 +7,15 @@ import 'models/user.dart';
 
 /// Unified GitHub API interaction class built on Dio
 class Api {
+  static final Map<String, String> headers = {
+    HttpHeaders.accessControlAllowCredentialsHeader: 'true',
+    HttpHeaders.accessControlAllowHeadersHeader:
+        'Origin,Content-Type,X-Amz-Date,Authorization,X-Api-Key,X-Amz-Security-Token',
+    HttpHeaders.accessControlAllowMethodsHeader:
+        'GET, POST, OPTIONS, PUT, PATCH, DELETE',
+    HttpHeaders.accessControlAllowOriginHeader: '*',
+  };
+
   /// Fetch user directly from GitHub
   static Future<User> fetchUser(String username) async {
     var response = await Dio().get('${Endpoints.users}/$username');
