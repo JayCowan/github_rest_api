@@ -8,16 +8,18 @@ import 'dart:io';
 // Note: avoid importing dio without specifying in show to avoid conflicting
 // class names with dart:io
 import 'package:dio/dio.dart' show DioError;
-import 'package:dotenv/dotenv.dart' show load, clean, isEveryDefined, env;
+import 'package:dotenv/dotenv.dart' show load;
 import 'package:shelf/shelf.dart';
 import 'package:shelf/shelf_io.dart' as shelf_io;
 import 'package:shelf_router/shelf_router.dart' as shelf_router;
 import 'package:shelf_static/shelf_static.dart' as shelf_static;
+import 'package:url_strategy/url_strategy.dart';
 
 import 'api.dart';
 import 'models/user.dart';
 
 Future main() async {
+  setPathUrlStrategy();
   load();
   // If the "PORT" environment variable is set, listen to it. Otherwise, 8080.
   // https://cloud.google.com/run/docs/reference/container-contract#port
@@ -34,7 +36,7 @@ Future main() async {
   final server = await shelf_io.serve(
     // See https://pub.dev/documentation/shelf/latest/shelf/logRequests.html
     logRequests()
-        // See https://pub.dev/documentation/shelf/latest/shelf/MiddlewareExtensions/addHandler.html
+    // See https://pub.dev/documentation/shelf/latest/shelf/MiddlewareExtensions/addHandler.html
         .addHandler(cascade.handler),
     InternetAddress.anyIPv4, // Allows external connections
     port,
@@ -44,37 +46,44 @@ Future main() async {
 }
 
 // Serve files from the file system.
-final _staticHandler =
-    shelf_static.createStaticHandler('public', defaultDocument: 'index.html');
+final _staticHandler = shelf_static.createStaticHandler('build/web',
+    defaultDocument: 'index.html');
 
 // Router instance to handler requests.
 final _router = shelf_router.Router()
   ..get('/rank=<userList>', _rankHandler)
   ..get('/user/<username>', _userHandler)
   ..get('/repo/<owner>/<repoName>', _repoHandler);
+//..get('/user/<username>/repos');
 
 Future<Response> _userHandler(request, String username) async {
   final githubResponse = await Api.fetchUser(username);
+  var headers = {'content-type': 'application/json'};
+  headers.addAll(Api.headers);
   return Response.ok(
     JsonEncoder.withIndent(' ').convert(githubResponse.toJson()),
-    headers: {
-      'content-type': 'application/json',
-    },
+    headers: headers,
   );
 }
 
 Future<Response> _repoHandler(request, String owner, String repoName) async {
   try {
     final githubResponse = await Api.fetchRepo(owner, repoName);
+    var headers = {'content-type': 'application/json'};
+    headers.addAll(Api.headers);
     return Response.ok(
       JsonEncoder.withIndent(' ').convert(githubResponse.toJson()),
-      headers: {'content-type': 'application/json'},
+      headers: headers,
     );
   } on DioError catch (e, s) {
     stderr.addError(e, s);
     return Response.internalServerError();
   }
 }
+
+/*Future<Response> _fetchReposHandler(Request request, String username) async {
+  try {} catch (e) {}
+}*/
 
 Future<Response> _rankHandler(Request request, String userList) async {
   try {
@@ -106,7 +115,12 @@ Future<Response> _rankHandler(Request request, String userList) async {
                           .compareTo(DateTime.tryParse(a.createdAt!)!)));
     });
     print(jsonEncode(ranks));
-    return Response.ok(jsonEncode(ranks));
+    var headers = {'content-type': 'application/json'};
+    headers.addAll(Api.headers);
+    return Response.ok(
+      jsonEncode(ranks),
+      headers: headers,
+    );
   } on DioError catch (e, s) {
     stderr.addError(e, s);
     return Response.internalServerError();
