@@ -326,7 +326,6 @@ class Repo {
     data['license'] = license;
     data['allow_forking'] = allowForking;
     data['is_template'] = isTemplate;
-    // TODO: Check if this causes issues
     if (topics != null) {
       data['topics'] = topics!.map((v) async => v).toList();
     }

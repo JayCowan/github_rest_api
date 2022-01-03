@@ -1,5 +1,3 @@
-import 'dart:convert';
-import 'dart:io';
 
 import 'package:dio/dio.dart';
 import 'package:github_rest_api/models/user.dart';
@@ -28,7 +26,7 @@ class Api {
         throw Exception(
             'Request failed with code: ${response.statusCode}, and message ${response.statusMessage}');
       }
-    } on FormatException catch (e, s) {
+    } on FormatException catch (e) {
       print(e.message);
       rethrow;
     }
