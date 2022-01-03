@@ -41,9 +41,13 @@ $ dart run bin/github_rest_api.dart
 
 # Web App
 
+The Web App is a leaderboard which will rank GitHub users according to several factors including date created,
+followers, number of repos, etc...
+
 1. Download and install [Flutter]("https://flutter.dev")
 2. Run `flutter build web` from the repo directory
 3. Start the API on `localhost:8080`
 4. Start a web emulator and run `flutter run` from the project directory
+5. Add new users to the board by clicking the plus (+) button
 
 Files relating to the web app are found in `lib/`, with the main method in `lib/main.dart`
